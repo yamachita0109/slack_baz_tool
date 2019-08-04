@@ -1,0 +1,27 @@
+version: '3.1'
+
+services:
+
+  slack_mongo:
+    image: mongo
+    container_name: slack_mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    ports:
+      - 27017:27017
+    volumes:
+      - ./docker/mongo/db:/data/db
+      - ./docker/mongo/configdb:/data/configdb
+
+  slack_node:
+    image: node:10.15.3
+    container_name: slack_node
+    environment:
+      TZ: Asia/Tokyo
+    volumes:
+      - ./app:/app
+    command: "npm install"
+    entrypoint: "node /app/index.js"
+
