@@ -22,6 +22,5 @@ services:
       TZ: Asia/Tokyo
     volumes:
       - ./app:/app
-    command: "npm install"
+    command: [sh, -c, cd /app && npm install]
     entrypoint: "node /app/index.js"
-
