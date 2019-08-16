@@ -48,13 +48,12 @@ const writeFile = (name, text) => {
 }
 
 const postMessage = (v) => {
-  slackPostOption.qs.text = `バズスレッドです。\n\`\`\`${v.text}\`\`\`\n${messageLink}p${v.ts}`
+  slackPostOption.qs.text = `This thread is BUZZ. (${v.reply_count} replies)\n\`\`\`${v.text}\`\`\`\n${messageLink}p${v.ts}`
   requestPromise(slackPostOption)
 }
 
-const isLimitMultiple = (n) => {
-  console.log(n)
-  return n % limitMultiple === 0
+const getCountLogic = (n) => {
+  return Math.floor(n / limitMultiple)
 }
 
 request(slackHistoryOption, (err, res, body) => {
@@ -62,26 +61,15 @@ request(slackHistoryOption, (err, res, body) => {
     console.error(err)
     return
   }
-  const msg = body.messages.filter((o) => {
-    return o.reply_count
-      && limit <= o.reply_count
-      && isLimitMultiple(o.reply_count)
-  })
-  if (msg.length === 0) {
-    console.log('Zero')
-    return
-  }
-  msg.forEach((v, i) => {
-    const r = readFile(v.ts)
-    if (r) {
-      if (Number(r) < Number(v.reply_count)) {
-        postMessage(v)
-        writeFile(v.ts, v.reply_count)
-
-      }
-    } else {
+  body.messages
+    .filter((o) => {
+      const c = readFile(o.ts)
+      return c
+        ? (o.reply_count && getCountLogic(c) < getCountLogic(o.reply_count))
+        : (o.reply_count && limit <= o.reply_count)
+    })
+    .forEach((v, i) => {
       postMessage(v)
       writeFile(v.ts, v.reply_count)
-    }
-  })
+    })
 })
