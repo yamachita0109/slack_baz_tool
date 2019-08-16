@@ -7,6 +7,7 @@ const fs = require('fs')
 // TODO 環境変数
 const limit = 10
 const limitMultiple = 5
+const limitPostText = 500
 const slackHost = 'https://xxxx.slack.com/'
 const tolken = 'xxxx'
 const slackHistoryId = 'xxxx'
@@ -48,7 +49,7 @@ const writeFile = (name, text) => {
 }
 
 const postMessage = (v) => {
-  slackPostOption.qs.text = `This thread is BUZZ. (${v.reply_count} replies)\n\`\`\`${v.text}\`\`\`\n${messageLink}p${v.ts}`
+  slackPostOption.qs.text = `This thread is BUZZ. (${v.reply_count} replies)\n\`\`\`${v.text.length < limitPostText ? v.text : v.text.substr(0, limitPostText) + '...'}\`\`\`\n${messageLink}p${v.ts}`
   requestPromise(slackPostOption)
 }
 
